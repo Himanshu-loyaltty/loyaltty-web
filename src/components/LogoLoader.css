@@ -1,0 +1,228 @@
+.loader-wrapper {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background-color: #ffffff;
+  z-index: 9999;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: clamp(1rem, 3vw, 2rem);
+  overflow: hidden;
+}
+
+.loader-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(2.5rem, 6vh, 5rem);
+  width: 100%;
+  max-width: min(600px, 90vw);
+  margin: auto;
+}
+
+.logo-section {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: clamp(2rem, 5vw, 4rem);
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 1;
+}
+
+.logo-container {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  will-change: transform;
+  cursor: pointer;
+}
+
+.logo-background-effects {
+  position: absolute;
+  inset: -50%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.logo-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  filter: blur(30px);
+  will-change: transform, opacity;
+}
+
+.logo-glow.primary {
+  background: radial-gradient(
+    circle at center,
+    rgba(0, 0, 81, 0.08) 0%,
+    rgba(0, 0, 81, 0.05) 40%,
+    transparent 70%
+  );
+}
+
+.logo-glow.secondary {
+  background: radial-gradient(
+    circle at center,
+    rgba(0, 0, 81, 0.06) 0%,
+    rgba(0, 0, 81, 0.03) 50%,
+    transparent 80%
+  );
+}
+
+.logo {
+  width: clamp(130px, 28vw, 280px);
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 30px rgba(0, 0, 81, 0.15));
+  user-select: none;
+  -webkit-user-drag: none;
+  will-change: transform;
+  transition: filter 0.3s ease;
+}
+
+.logo:hover {
+  filter: drop-shadow(0 15px 40px rgba(0, 0, 81, 0.2));
+}
+
+.loader-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1.2rem, 2.5vh, 2rem);
+  width: 100%;
+}
+
+.loading-bar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  width: min(100%, 320px);
+}
+
+.progress-container {
+  position: relative;
+  width: 100%;
+}
+
+.progress-wrapper {
+  width: 100%;
+  height: 3px;
+  background: rgba(0, 0, 81, 0.08);
+  border-radius: 1.5px;
+  overflow: hidden;
+}
+
+.loading-bar {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    #000051,
+    rgba(0, 0, 81, 0.85)
+  );
+  will-change: transform;
+}
+
+.progress-glow {
+  position: absolute;
+  inset: -2px;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(0, 0, 81, 0.1) 0%,
+    transparent 70%
+  );
+  filter: blur(4px);
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.loading-text-container {
+  display: flex;
+  align-items: center;
+  gap: 0.2em;
+}
+
+.loading-text {
+  color: #000051;
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  opacity: 0.9;
+}
+
+.loading-dots {
+  display: inline-block;
+  min-width: 1.2em;
+  color: #000051;
+  font-weight: 600;
+}
+
+/* Modern Mobile Devices */
+@supports (padding: max(0px)) {
+  .loader-wrapper {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+}
+
+/* Landscape Mode Optimization */
+@media (max-height: 500px) and (orientation: landscape) {
+  .loader-content {
+    flex-direction: row;
+    gap: clamp(2rem, 5vw, 4rem);
+  }
+  
+  .logo-section {
+    flex-shrink: 0;
+    width: min(45%, 300px);
+  }
+  
+  .loader-bottom {
+    justify-content: center;
+    min-width: 200px;
+  }
+}
+
+/* High DPI Screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .logo {
+    filter: drop-shadow(0 12px 36px rgba(0, 0, 81, 0.12));
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .logo-container,
+  .logo-glow,
+  .loading-bar {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+  
+  .progress-glow {
+    display: none;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .loader-wrapper {
+    background-color: #ffffff;
+  }
+}
+
+/* Print styles */
+@media print {
+  .loader-wrapper {
+    display: none;
+  }
+}
