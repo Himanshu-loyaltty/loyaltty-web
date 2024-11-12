@@ -31,7 +31,10 @@ module.exports = {
       boxShadow: {
         'soft': '0 0 20px rgba(0, 0, 0, 0.1)',
         'inner-soft': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
-      }
+      },
+      screens: {
+        'xs': '480px',
+      },
     },
   },
   plugins: [],

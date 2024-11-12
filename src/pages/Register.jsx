@@ -237,16 +237,6 @@ const Register = ({
               )}
             </AnimatePresence>
 
-            {/* Social Login Section */}
-            <div className="relative my-4 sm:my-5">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200"></div>
-              </div>
-              <div className="relative flex justify-center text-sm sm:text-base">
-                <span className="px-2 bg-white text-gray-500">{socialText}</span>
-              </div>
-            </div>
-
             {/* Submit Button */}
             <button
               type="submit"

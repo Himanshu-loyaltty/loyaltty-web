@@ -23,7 +23,6 @@ const RetailerRegister = () => {
           type: 'text'
         }
       ]}
-      socialText="or continue with"
     />
   );
 };
