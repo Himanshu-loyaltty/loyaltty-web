@@ -92,7 +92,7 @@ const Onboarding = () => {
                     For Business
                   </h3>
                   <p className="text-gray-600 text-sm">
-                    Create and manage loyalty programs
+                    Create and manage loyaltty programs
                   </p>
                 </div>
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-0 translate-x-2">

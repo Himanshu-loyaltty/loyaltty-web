@@ -334,8 +334,8 @@ const BusinessInfo = () => {
       </div>
 
       {/* Main Content */}
-      <main className="relative z-10 max-w-3xl mx-auto py-6 sm:py-10 px-4 sm:px-6 lg:px-8">
-        <div className="bg-white/70 backdrop-blur-xl shadow-xl rounded-2xl border border-white/30">
+      <main className="relative z-10 max-w-3xl mx-auto py-6 sm:py-10 px-4 sm:px-6 lg:px-8 min-h-screen flex flex-col sm:block">
+        <div className="bg-white/70 backdrop-blur-xl shadow-xl rounded-2xl border border-white/30 my-auto">
           {/* Header moved inside the form container */}
           <div className="border-b border-gray-200/50 px-4 sm:px-6 py-4">
             <div className="flex items-center justify-between">

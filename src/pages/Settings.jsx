@@ -49,10 +49,10 @@ const Settings = () => {
       path: '/settings/shout-out'
     },
     {
-      id: 'loyalty-reward',
-      title: 'Loyalty Reward',
+      id: 'loyaltty-reward',
+      title: 'Loyaltty Reward',
       icon: BiGift,
-      path: '/settings/loyalty-reward'
+      path: '/settings/loyaltty-reward'
     },
     {
       id: 'contact-us',

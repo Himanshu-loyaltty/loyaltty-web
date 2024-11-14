@@ -18,6 +18,7 @@ import logo from "../assets/loyalttyforweb.png";
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isMobileProfileOpen, setIsMobileProfileOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -55,12 +56,12 @@ const Navbar = () => {
 
   const isActive = (path) => location.pathname === path;
 
-  const ProfileDropdown = ({ onClose }) => (
+  const ProfileDropdown = ({ onClose, isMobile = false }) => (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden"
+      className={`${isMobile ? 'absolute top-16 left-0 right-0 mx-4' : 'absolute bottom-full left-0 right-0 mb-2'} bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden`}
     >
       <div className="p-4 border-b border-gray-100">
         <div className="flex items-center gap-3 mb-3">
@@ -170,20 +171,27 @@ const Navbar = () => {
         {/* Top Bar */}
         <div className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 px-4 flex items-center justify-between z-50">
           <Link to="/" className="flex items-center gap-2">
-            <img src={logo} alt="Loyaltty Logo" className="w-6 h-8" />
-            <span className="text-lg font-bold text-gray-900">Loyaltty</span>
+            <img src={logo} alt="Loyaltty Logo" className="w-20" />
           </Link>
           <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            onClick={() => setIsMobileProfileOpen(!isMobileProfileOpen)}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors relative"
           >
-            {isMobileMenuOpen ? (
-              <BiX className="w-6 h-6 text-gray-600" />
-            ) : (
-              <BiMenu className="w-6 h-6 text-gray-600" />
-            )}
+            <BiUser className="w-6 h-6 text-gray-600" />
           </button>
+          
+          <AnimatePresence>
+            {isMobileProfileOpen && (
+              <ProfileDropdown 
+                onClose={() => setIsMobileProfileOpen(false)} 
+                isMobile={true}
+              />
+            )}
+          </AnimatePresence>
         </div>
+
+        {/* Content Padding for Fixed Header */}
+        <div className="pt-16"></div>
 
         {/* Bottom Navigation */}
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
@@ -211,86 +219,6 @@ const Navbar = () => {
             ))}
           </div>
         </div>
-
-        {/* Mobile Menu Overlay */}
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <motion.div
-                initial={{ x: '100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '100%' }}
-                transition={{ type: 'spring', damping: 25 }}
-                className="absolute right-0 top-0 bottom-0 w-80 bg-white shadow-xl"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="flex flex-col h-full">
-                  <div className="p-6 border-b border-gray-100">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-[#000066] text-white flex items-center justify-center">
-                        <BiUser className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">John Doe</p>
-                        <p className="text-sm text-gray-500">Store Manager</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex-1 p-4 space-y-2">
-                    {navigationItems.map((item) => (
-                      <Link
-                        key={item.name}
-                        to={item.path}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                          isActive(item.path)
-                            ? 'bg-[#000066] text-white'
-                            : 'text-gray-600 hover:bg-gray-50'
-                        }`}
-                      >
-                        <item.icon className="w-5 h-5" />
-                        <div className="flex-1">
-                          <span className="font-medium">{item.name}</span>
-                          <p className={`text-xs ${
-                            isActive(item.path) ? 'text-white/80' : 'text-gray-400'
-                          }`}>
-                            {item.description}
-                          </p>
-                        </div>
-                        {item.badge && (
-                          <span className={`px-2 py-0.5 rounded-full text-xs ${
-                            isActive(item.path)
-                              ? 'bg-white text-[#000066]'
-                              : 'bg-[#000066] text-white'
-                          }`}>
-                            {item.badge}
-                          </span>
-                        )}
-                      </Link>
-                    ))}
-                  </div>
-
-                  <div className="p-4 border-t border-gray-100">
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-colors"
-                    >
-                      <BiLogOut className="w-5 h-5" />
-                      <span className="font-medium">Sign Out</span>
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </>
   );
