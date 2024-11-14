@@ -66,3 +66,35 @@ code {
 .slick-dots li button:before {
   display: none !important;
 }
+
+@media print {
+  @page {
+    size: auto;
+    margin: 20mm;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+}
+
+/* Hide print-only elements in normal view */
+.print-only {
+  display: none;
+}

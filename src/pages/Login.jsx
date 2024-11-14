@@ -192,7 +192,7 @@ const Login = ({
           transition={{ delay: 0.1 }}
         >
           {/* Back Button */}
-          <BorderedBackButton onClick={() => navigate('/get-started')} />
+          <BorderedBackButton onClick={() => navigate('/')} />
 
           {/* Logo & Header */}
           <div className="text-center mb-6 mt-2">
@@ -383,7 +383,7 @@ const Login = ({
                 to={registerPath}
                 className="text-[#000066] font-semibold hover:text-[#000066]/90 transition-colors"
               >
-                Sign up
+                Register
               </Link>
             </div>
 

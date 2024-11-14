@@ -3,13 +3,13 @@ import Login from '../Login';
 
 const RetailerLogin = () => {
   return (
-    <Login 
-      userType="retailer" 
+    <Login
+      userType="retailer"
       title="Welcome Back"
       subtitle="Sign in to manage your business"
-      redirectPath="/retailer/business-info"
-      forgotPasswordPath="/retailer/forgot-password"
-      registerPath="/retailer/register"
+      redirectPath="/business-info"
+      forgotPasswordPath="/forgot-password"
+      registerPath="/business-info"
       socialText="or continue with"
     />
   );
