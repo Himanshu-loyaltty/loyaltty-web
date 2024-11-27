@@ -30,6 +30,13 @@ const Navbar = () => {
       description: 'Overview of your business'
     },
     { 
+      name: 'Deals', 
+      icon: BiStore, 
+      path: '/deals',
+      description: 'Manage your deals and offers',
+      badge: 2
+    },
+    { 
       name: 'Notifications', 
       icon: BiBell, 
       path: '/notifications',
@@ -95,7 +102,7 @@ const Navbar = () => {
       <nav className="hidden lg:flex fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200">
         <div className="w-full flex flex-col">
           {/* Logo Section */}
-          <div className="p-6 border-b border-gray-100">
+          <div className="px-6 border-b border-gray-100">
             <Link to="/" className="flex items-center gap-3">
               <img src={logo} alt="Loyaltty Logo" className="w-34" />
             </Link>

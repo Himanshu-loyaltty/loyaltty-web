@@ -58,6 +58,15 @@ const BusinessInfo = () => {
     }
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // ... your existing submit logic ...
+
+    // Set the navigation flag before redirecting
+    sessionStorage.setItem('fromBusinessInfo', 'true');
+    navigate('/dashboard');
+  };
+
   const renderStepContent = () => {
     switch (step) {
       case 1:

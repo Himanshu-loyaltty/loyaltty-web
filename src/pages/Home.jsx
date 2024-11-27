@@ -1,4 +1,4 @@
-import React, { useState, Suspense, useRef } from 'react';
+import React, { useState, Suspense, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { BiQrScan, BiPlus, BiEdit, BiX } from 'react-icons/bi';
@@ -7,6 +7,10 @@ import QRCode from 'react-qr-code';
 import logo from "../assets/loyaltty100x100.png";
 import { useReactToPrint } from 'react-to-print';
 import ReactDOM from 'react-dom';
+import WelcomeDealModal from '../components/WelcomeDealModal';
+import AddDealModal from '../components/AddDealModal';
+import EditDealModal from '../components/EditDealModal';
+import DashboardHeader from '../components/DashboardHeader';
 
 const QRCodeWithFallback = ({ value, size }) => {
   return (
@@ -85,6 +89,12 @@ const Home = () => {
   const [activeTab, setActiveTab] = useState('Active Deals');
   const [qrError, setQrError] = useState(false);
   const printRef = useRef();
+  const [showWelcomeDeal, setShowWelcomeDeal] = useState(true);
+  const [showAddDeal, setShowAddDeal] = useState(false);
+  const [hasWelcomeDeal, setHasWelcomeDeal] = useState(false);
+  const [deals, setDeals] = useState([]);
+  const [selectedDeal, setSelectedDeal] = useState(null);
+  const [showEditDeal, setShowEditDeal] = useState(false);
 
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
@@ -132,25 +142,134 @@ const Home = () => {
     });
   };
 
-  const deals = [
-    {
-      id: 1,
-      name: 'Burger deal',
-      price: 20,
-      image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=3270&auto=format&fit=crop',
-      from: '1/1/2023',
-      to: '1/2/2023',
-      type: 'Welcome Deals',
-      status: 'active'
+  useEffect(() => {
+    const welcomeDealStatus = localStorage.getItem('welcomeDealStatus');
+    const isFromBusinessInfo = sessionStorage.getItem('fromBusinessInfo');
+    
+    // Show welcome deal modal only if coming from business info and no welcome deal exists
+    if (isFromBusinessInfo === 'true' && welcomeDealStatus !== 'created') {
+      setShowWelcomeDeal(true);
+      // Clear the navigation flag
+      sessionStorage.removeItem('fromBusinessInfo');
     }
-  ];
+
+    if (welcomeDealStatus === 'created') {
+      setHasWelcomeDeal(true);
+    }
+  }, []);
+
+  const handleAddDealClick = () => {
+    // Check if welcome deal exists
+    const welcomeDealExists = deals.some(deal => deal.type === 'Welcome Deal');
+    const welcomeDealStatus = localStorage.getItem('welcomeDealStatus');
+
+    if (!welcomeDealExists && welcomeDealStatus !== 'created') {
+      // If no welcome deal, show welcome deal modal
+      setShowWelcomeDeal(true);
+    } else {
+      // If welcome deal exists, show regular deal modal
+      setShowAddDeal(true);
+    }
+  };
+
+  const handleCreateWelcomeDeal = (dealData) => {
+    console.log('Creating welcome deal:', dealData);
+    const welcomeDeal = {
+      id: Date.now(),
+      name: dealData.dealName || 'Welcome Deal',
+      price: dealData.value,
+      image: dealData.images?.[0]?.url || 'default-image-url',
+      type: 'Welcome Deal',
+      status: 'active'
+    };
+
+    // Update deals list
+    setDeals(prevDeals => {
+      // Remove any existing welcome deals first
+      const regularDeals = prevDeals.filter(deal => deal.type !== 'Welcome Deal');
+      return [welcomeDeal, ...regularDeals];
+    });
+    
+    // Mark welcome deal as created
+    localStorage.setItem('welcomeDealStatus', 'created');
+    setHasWelcomeDeal(true);
+    setShowWelcomeDeal(false);
+  };
+
+  const handleCreateDeal = (dealData) => {
+    console.log('Creating new deal:', dealData);
+    // Create a new deal object with the submitted data
+    const newDeal = {
+      id: Date.now(),
+      name: dealData.dealName,
+      price: dealData.dealValue,
+      image: dealData.dealPictures[0] || 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=3270&auto=format&fit=crop',
+      from: dealData.startDate,
+      to: dealData.endDate,
+      type: 'Regular Deal',
+      status: 'active'
+    };
+
+    // Add the new deal to the deals list
+    setDeals(prevDeals => [...prevDeals, newDeal]);
+    
+    // Close the modal
+    setShowAddDeal(false);
+  };
+
+  const handleEditDeal = (dealData) => {
+    setDeals(prevDeals => 
+      prevDeals.map(deal => 
+        deal.id === dealData.id 
+          ? {
+              ...deal,
+              name: dealData.dealName,
+              price: dealData.dealValue,
+              image: dealData.dealPictures[0]?.url || deal.image,
+              from: dealData.startDate,
+              to: dealData.endDate,
+              description: dealData.shortDescription,
+              fullDetails: dealData.fullDetails,
+              terms: dealData.termsAndConditions,
+              repeatDays: dealData.repeatDays
+            }
+          : deal
+      )
+    );
+  };
+
+  const handleEditClick = (deal, e) => {
+    e.stopPropagation();
+    setSelectedDeal(deal);
+    setShowEditDeal(true);
+  };
+
+  const filteredDeals = deals.filter(deal => {
+    const today = new Date();
+    const startDate = deal.from ? new Date(deal.from) : null;
+    const endDate = deal.to ? new Date(deal.to) : null;
+
+    switch (activeTab) {
+      case 'Active Deals':
+        return deal.type === 'Welcome Deal' || 
+          (startDate <= today && endDate >= today);
+      case 'Upcoming Deals':
+        return startDate && startDate > today;
+      case 'Past Deals':
+        return endDate && endDate < today;
+      default:
+        return true;
+    }
+  });
 
   return (
     <Layout>
+      <DashboardHeader />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Store Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Store Name</h1>
+        <div className="bg-[#1E1B4B] text-white px-4 py-3 rounded-lg mb-8">
+          <h1 className="text-2xl font-bold">Dashboard</h1>
         </div>
 
         {/* Main Content Grid */}
@@ -161,24 +280,27 @@ const Home = () => {
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <div className="flex flex-col items-center">
                 {!qrError ? (
-                  <QRCodeWithFallback value="https://example.com/menu" size={200} />
+                  <QRCodeWithFallback
+                    value="https://example.com/menu"
+                    size={200}
+                  />
                 ) : (
                   <div className="text-red-500">Failed to generate QR code</div>
                 )}
-                
+
                 <p className="text-center text-gray-600 mt-6 mb-6">
                   Scan this QR code to get amazing deals
                 </p>
-                
+
                 <div className="flex gap-4 w-full">
-                  <button 
-                    onClick={() => handlePrintAction('store')}
+                  <button
+                    onClick={() => handlePrintAction("store")}
                     className="flex-1 px-4 py-2 border border-[#000066] text-[#000066] rounded-lg hover:bg-[#000066]/5 transition-colors"
                   >
                     Print Store
                   </button>
-                  <button 
-                    onClick={() => handlePrintAction('qr')}
+                  <button
+                    onClick={() => handlePrintAction("qr")}
                     className="flex-1 px-4 py-2 bg-[#000066] text-white rounded-lg hover:bg-[#000066]/90 transition-colors"
                   >
                     Print QR
@@ -205,14 +327,14 @@ const Home = () => {
             {/* Deals Tabs */}
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <div className="flex gap-2 mb-6 overflow-x-auto">
-                {['Active Deals', 'Upcoming Deals', 'Past Deals'].map((tab) => (
+                {["Active Deals", "Upcoming Deals", "Past Deals"].map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
                     className={`px-4 py-2 rounded-full whitespace-nowrap ${
-                      activeTab === tab 
-                        ? 'bg-[#000066] text-white' 
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      activeTab === tab
+                        ? "bg-[#000066] text-white"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                     } transition-colors`}
                   >
                     {tab}
@@ -222,7 +344,7 @@ const Home = () => {
 
               {/* Deals List */}
               <div className="space-y-4">
-                {deals.map((deal) => (
+                {filteredDeals.map((deal) => (
                   <motion.div
                     key={deal.id}
                     initial={{ opacity: 0, y: 20 }}
@@ -237,29 +359,41 @@ const Home = () => {
                     <div className="flex-1">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h3 className="font-medium text-gray-900">{deal.name}</h3>
+                          <h3 className="font-medium text-gray-900">
+                            {deal.name}
+                          </h3>
                           <p className="text-sm text-gray-500">
                             From: {deal.from} To: {deal.to}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-[#000066] font-bold">${deal.price}</span>
-                          <button className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
+                          <span className="text-[#000066] font-bold">
+                            ${deal.price}
+                          </span>
+                          <button
+                            onClick={(e) => handleEditClick(deal, e)}
+                            className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                          >
                             <BiEdit className="w-4 h-4 text-gray-600" />
                           </button>
                         </div>
                       </div>
                       <div className="mt-2">
-                        <span className="text-sm text-[#000066]">{deal.type}</span>
+                        <span className="text-sm text-[#000066]">
+                          {deal.type}
+                        </span>
                       </div>
                     </div>
                   </motion.div>
                 ))}
 
                 {/* Add Deal Button */}
-                <button className="w-full flex items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 rounded-xl text-gray-600 hover:border-[#000066] hover:text-[#000066] transition-colors">
+                <button
+                  onClick={handleAddDealClick}
+                  className="w-full flex items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 rounded-xl text-gray-600 hover:border-[#000066] hover:text-[#000066] transition-colors"
+                >
                   <BiPlus className="w-5 h-5" />
-                  Add Deals
+                  {!hasWelcomeDeal ? "Add Welcome Deal" : "Add Deal"}
                 </button>
               </div>
             </div>
@@ -268,9 +402,40 @@ const Home = () => {
       </div>
 
       {/* Hidden Print Content */}
-      <div style={{ display: 'none' }}>
-        <PrintView ref={printRef} type="store" storeName="Store Name" deals={deals} />
+      <div style={{ display: "none" }}>
+        <PrintView
+          ref={printRef}
+          type="store"
+          storeName="Store Name"
+          deals={deals}
+        />
       </div>
+
+      {/* Welcome Deal Modal */}
+      <WelcomeDealModal
+        isOpen={showWelcomeDeal}
+        onClose={() => {
+          setShowWelcomeDeal(false);
+          localStorage.setItem("welcomeDealStatus", "skipped");
+        }}
+        onSubmit={handleCreateWelcomeDeal}
+      />
+
+      <AddDealModal
+        isOpen={showAddDeal}
+        onClose={() => setShowAddDeal(false)}
+        onSubmit={handleCreateDeal}
+      />
+
+      <EditDealModal
+        isOpen={showEditDeal}
+        onClose={() => {
+          setShowEditDeal(false);
+          setSelectedDeal(null);
+        }}
+        onSubmit={handleEditDeal}
+        deal={selectedDeal}
+      />
     </Layout>
   );
 };
