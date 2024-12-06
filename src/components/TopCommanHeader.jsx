@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BiSearch, BiBell, BiCog, BiChevronDown, BiPackage, BiTime, BiLogOut } from 'react-icons/bi';
+import { BiSearch, BiBell, BiCog, BiChevronDown, BiPackage, BiTime, BiLogOut, BiUser } from 'react-icons/bi';
 import { Link, useNavigate } from 'react-router-dom';
 
-const DashboardHeader = () => {
+const TopCommanHeader = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const navigate = useNavigate();
 
   // Fake notifications data
@@ -71,9 +72,10 @@ const DashboardHeader = () => {
   };
 
   return (
-    <div className="bg-white border-b border-gray-100">
+    <div className="bg-white border-b border-gray-100 lg:fixed lg:top-0 lg:right-0 lg:left-64 lg:z-40">
       <div className="max-w-[1600px] mx-auto">
-        <div className="flex items-center justify-between h-[72px] px-6">
+        {/* Desktop Header */}
+        <div className="hidden lg:flex items-center justify-between h-[72px] px-6">
           {/* Left - Welcome Message */}
           <div>
             <h1 className="text-[20px] font-semibold text-[#15157B]">
@@ -90,19 +92,19 @@ const DashboardHeader = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search here..."
-                className="w-[400px] pl-11 pr-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#15157B]/10 focus:border-[#15157B] transition-colors"
+                className="w-[300px] xl:w-[400px] pl-11 pr-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#15157B]/10 focus:border-[#15157B] transition-colors"
               />
               <BiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             </div>
 
             {/* Notifications */}
             <div className="relative">
-              <button 
+              <button
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="relative p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
               >
                 <BiBell className="w-6 h-6" />
-                {notifications.some(n => n.unread) && (
+                {notifications.some((n) => n.unread) && (
                   <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
                 )}
               </button>
@@ -119,7 +121,9 @@ const DashboardHeader = () => {
                   >
                     <div className="p-4 border-b border-gray-100">
                       <div className="flex items-center justify-between">
-                        <h3 className="font-medium text-gray-900">Notifications</h3>
+                        <h3 className="font-medium text-gray-900">
+                          Notifications
+                        </h3>
                         <button
                           onClick={handleMarkAllAsRead}
                           className="text-xs text-[#15157B] font-medium hover:text-[#15157B]/80"
@@ -158,7 +162,7 @@ const DashboardHeader = () => {
                       ))}
                     </div>
                     <div className="p-4 border-t border-gray-100 bg-gray-50">
-                      <Link 
+                      <Link
                         to="/notifications"
                         className="text-sm text-[#15157B] hover:text-[#15157B]/80 font-medium"
                       >
@@ -172,7 +176,7 @@ const DashboardHeader = () => {
 
             {/* Settings */}
             <button
-              onClick={() => navigate('/settings')}
+              onClick={() => navigate("/settings")}
               className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
             >
               <BiCog className="w-6 h-6" />
@@ -184,14 +188,14 @@ const DashboardHeader = () => {
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
                 className="flex items-center gap-2 p-1 hover:bg-gray-50 rounded-lg transition-colors"
               >
-                <div className="w-10 h-10 rounded-lg overflow-hidden">
-                  <img
-                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
+                <div className="w-10 h-10 rounded-full bg-[#000066] text-white flex items-center justify-center flex-shrink-0">
+                  <BiUser className="w-5 h-5" />
                 </div>
-                <BiChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${showProfileMenu ? 'rotate-180' : ''}`} />
+                <BiChevronDown
+                  className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${
+                    showProfileMenu ? "rotate-180" : ""
+                  }`}
+                />
               </button>
 
               {/* Profile Dropdown */}
@@ -206,16 +210,14 @@ const DashboardHeader = () => {
                   >
                     <div className="p-4 border-b border-gray-100">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg overflow-hidden">
-                          <img
-                            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                            alt="Profile"
-                            className="w-full h-full object-cover"
-                          />
+                        <div className="w-10 h-10 rounded-full bg-[#000066] text-white flex items-center justify-center flex-shrink-0">
+                          <BiUser className="w-5 h-5" />
                         </div>
                         <div>
                           <p className="font-medium text-gray-900">John Doe</p>
-                          <p className="text-sm text-gray-500">John Doe@example.com</p>
+                          <p className="text-sm text-gray-500">
+                            John Doe@example.com
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -234,9 +236,49 @@ const DashboardHeader = () => {
             </div>
           </div>
         </div>
+
+        {/* Mobile Header */}
+        <div className="lg:hidden flex items-center justify-between h-[64px] px-4">
+          <h1 className="text-base font-semibold text-[#15157B]">
+            Welcome, John <span className="wave-emoji">👋</span>
+          </h1>
+
+          {/* Mobile Search Button */}
+          <button
+            onClick={() => setShowMobileSearch(!showMobileSearch)}
+            className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+          >
+            <BiSearch className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Mobile Search Expandable */}
+        <AnimatePresence>
+          {showMobileSearch && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="lg:hidden px-4 pb-4"
+            >
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search here..."
+                  className="w-full pl-11 pr-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#15157B]/10 focus:border-[#15157B] transition-colors"
+                  autoFocus
+                />
+                <BiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
 };
 
-export default DashboardHeader; 
+export default TopCommanHeader; 

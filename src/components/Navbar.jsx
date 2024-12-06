@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BiHomeAlt, 
   BiBell, 
@@ -64,12 +63,7 @@ const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   const ProfileDropdown = ({ onClose, isMobile = false }) => (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      className={`${isMobile ? 'absolute top-16 left-0 right-0 mx-4' : 'absolute bottom-full left-0 right-0 mb-2'} bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden`}
-    >
+    <div className={`${isMobile ? 'absolute top-16 left-0 right-0 mx-4' : 'absolute bottom-full left-0 right-0 mb-2'} bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden`}>
       <div className="p-4 border-b border-gray-100">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 rounded-full bg-[#000066] text-white flex items-center justify-center">
@@ -93,7 +87,7 @@ const Navbar = () => {
           <span className="font-medium">Sign Out</span>
         </button>
       </div>
-    </motion.div>
+    </div>
   );
 
   return (
@@ -163,11 +157,9 @@ const Navbar = () => {
                 }`} />
               </button>
 
-              <AnimatePresence>
-                {isProfileOpen && (
-                  <ProfileDropdown onClose={() => setIsProfileOpen(false)} />
-                )}
-              </AnimatePresence>
+              {isProfileOpen && (
+                <ProfileDropdown onClose={() => setIsProfileOpen(false)} />
+              )}
             </div>
           </div>
         </div>
@@ -180,30 +172,38 @@ const Navbar = () => {
           <Link to="/" className="flex items-center gap-2">
             <img src={logo} alt="Loyaltty Logo" className="w-20" />
           </Link>
-          <button
-            onClick={() => setIsMobileProfileOpen(!isMobileProfileOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors relative"
-          >
-            <BiUser className="w-6 h-6 text-gray-600" />
-          </button>
+          <div className="flex items-center gap-2">
+            <Link to="/notifications" className="relative p-2">
+              <BiBell className="w-6 h-6 text-gray-600" />
+              {navigationItems.find(item => item.name === 'Notifications')?.badge && (
+                <span className="absolute top-0 right-0 w-4 h-4 bg-[#000066] text-white text-xs rounded-full flex items-center justify-center">
+                  {navigationItems.find(item => item.name === 'Notifications')?.badge}
+                </span>
+              )}
+            </Link>
+            <button
+              onClick={() => setIsMobileProfileOpen(!isMobileProfileOpen)}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors relative"
+            >
+              <BiUser className="w-6 h-6 text-gray-600" />
+            </button>
+          </div>
           
-          <AnimatePresence>
-            {isMobileProfileOpen && (
-              <ProfileDropdown 
-                onClose={() => setIsMobileProfileOpen(false)} 
-                isMobile={true}
-              />
-            )}
-          </AnimatePresence>
+          {isMobileProfileOpen && (
+            <ProfileDropdown 
+              onClose={() => setIsMobileProfileOpen(false)} 
+              isMobile={true}
+            />
+          )}
         </div>
 
         {/* Content Padding for Fixed Header */}
-        <div className="pt-16"></div>
+        <div className="pt-2 pb-14"></div>
 
         {/* Bottom Navigation */}
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
           <div className="flex justify-around items-center h-16">
-            {navigationItems.slice(0, 4).map((item) => (
+            {navigationItems.filter(item => item.name !== 'Notifications').map((item) => (
               <Link
                 key={item.name}
                 to={item.path}
@@ -231,4 +231,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar; 
+export default Navbar;

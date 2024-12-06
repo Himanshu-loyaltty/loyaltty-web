@@ -10,6 +10,14 @@ import bogoImage from '../assets/welcome_deal/buy1get1.png';
 import itemDiscountImage from '../assets/welcome_deal/3off.png';
 import fixedDiscountImage from '../assets/welcome_deal/image.png';
 
+const PREDEFINED_TERMS = [
+  "a. This offer can be availed only on the first visit.",
+  "b. This offer does not have any cash value.",
+  "c. This offer cannot be combined with another offer.",
+  "d. This offer is provided only when you show your eligibility.",
+  "e. We reserve the right to change, cancel, or deny the reward."
+];
+
 const DealCard = ({ type, selected, onClick }) => {
   return (
     <motion.button
@@ -283,6 +291,8 @@ const WelcomeDealModal = ({ isOpen, onClose, onSubmit }) => {
 
   const handleDealTypeSelect = (type) => {
     setSelectedDealType(type);
+    const config = getDealTypeConfig(type);
+    
     if (type.id === 'custom') {
       setCustomDeal(prev => ({
         ...prev,
@@ -299,7 +309,7 @@ const WelcomeDealModal = ({ isOpen, onClose, onSubmit }) => {
         value: type.template.value,
         minPurchase: type.template.minPurchase,
         images: [],
-        dealName: '',
+        dealName: type.label,
         description: generateDescription(type, type.template.value, type.template.minPurchase),
         fullDetails: type.description
       }));
@@ -351,6 +361,7 @@ const WelcomeDealModal = ({ isOpen, onClose, onSubmit }) => {
 
   const validateForm = () => {
     const newErrors = {};
+    const config = getDealTypeConfig(selectedDealType);
     
     // Deal name validation
     if (!customDeal.dealName.trim()) {
@@ -361,9 +372,16 @@ const WelcomeDealModal = ({ isOpen, onClose, onSubmit }) => {
 
     // Deal value validation
     if (!customDeal.value) {
-      newErrors.value = 'Deal value is required';
+      newErrors.value = `${config.valueLabel} is required`;
     } else if (isNaN(customDeal.value) || Number(customDeal.value) <= 0) {
-      newErrors.value = 'Deal value must be greater than 0';
+      newErrors.value = `${config.valueLabel} must be greater than 0`;
+    } else if (selectedDealType?.id === 'percentage' && Number(customDeal.value) > 100) {
+      newErrors.value = 'Percentage cannot be greater than 100';
+    }
+
+    // Minimum purchase validation
+    if (config.minPurchaseRequired && !customDeal.minPurchase) {
+      newErrors.minPurchase = `${config.minPurchaseLabel} is required`;
     }
 
     // Short description validation (now required)
@@ -448,32 +466,91 @@ const WelcomeDealModal = ({ isOpen, onClose, onSubmit }) => {
     }));
   };
 
+  const getDealTypeConfig = (dealType) => {
+    if (!dealType) return {};
+    
+    switch (dealType.id) {
+      case 'percentage':
+        return {
+          valueLabel: 'Discount percentage',
+          valuePlaceholder: 'Enter percentage (e.g. 10)',
+          valuePrefix: '%',
+          minPurchaseRequired: true,
+          minPurchaseLabel: 'Minimum purchase',
+        };
+      case 'fixed_discount':
+        return {
+          valueLabel: 'Discount amount',
+          valuePlaceholder: 'Enter amount',
+          valuePrefix: '$',
+          minPurchaseRequired: true,
+          minPurchaseLabel: 'Minimum purchase',
+        };
+      case 'free_item':
+        return {
+          valueLabel: 'Item value',
+          valuePlaceholder: 'Enter item value',
+          valuePrefix: '$',
+          minPurchaseRequired: false,
+          minPurchaseLabel: 'Minimum purchase (Optional)',
+        };
+      case 'bogo':
+        return {
+          valueLabel: 'Buy quantity',
+          valuePlaceholder: 'Enter buy quantity',
+          valuePrefix: '',
+          minPurchaseRequired: true,
+          minPurchaseLabel: 'Get quantity',
+          minPurchasePrefix: '',
+        };
+      case 'item_discount':
+        return {
+          valueLabel: 'Discount amount',
+          valuePlaceholder: 'Enter discount amount',
+          valuePrefix: '$',
+          minPurchaseRequired: false,
+          minPurchaseLabel: 'Minimum purchase (Optional)',
+        };
+      case 'custom':
+        return {
+          valueLabel: 'Deal value',
+          valuePlaceholder: 'Enter deal value',
+          valuePrefix: '$',
+          minPurchaseRequired: false,
+          minPurchaseLabel: 'Minimum purchase (Optional)',
+        };
+      default:
+        return {};
+    }
+  };
+
   const renderInputFields = () => {
+    const config = getDealTypeConfig(selectedDealType);
+    
     return (
       <>
         {/* Deal Value */}
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1.5">
-            Deal value <span className="text-red-500">*</span>
+            {config.valueLabel} <span className="text-red-500">*</span>
           </label>
           <div className="relative">
-            <select
-              className="absolute left-3 top-1/2 -translate-y-1/2 border-0 bg-transparent pr-2 text-gray-500 focus:ring-0 text-sm"
-              value="USD"
-            >
-              <option value="USD">USD</option>
-            </select>
+            {config.valuePrefix && (
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                {config.valuePrefix}
+              </span>
+            )}
             <input
               type="number"
               value={customDeal.value}
               onChange={handleValueChange}
               onBlur={() => handleBlur("value")}
-              className={`w-full pl-16 pr-3 py-2 text-sm rounded-lg border ${
+              className={`w-full ${config.valuePrefix ? 'pl-7' : 'pl-3'} pr-3 py-2 text-sm rounded-lg border ${
                 touched.value && errors.value
                   ? "border-red-500 focus:border-red-500 focus:ring-red-500"
                   : "border-gray-200 focus:border-[#000066] focus:ring-[#000066]"
               } focus:ring-1`}
-              placeholder="Enter deal value"
+              placeholder={config.valuePlaceholder}
             />
           </div>
           {touched.value && errors.value && (
@@ -484,53 +561,74 @@ const WelcomeDealModal = ({ isOpen, onClose, onSubmit }) => {
         {/* Minimum Purchase */}
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1.5">
-            Minimum purchase <span className="text-red-500">*</span>
+            {config.minPurchaseLabel} {config.minPurchaseRequired && <span className="text-red-500">*</span>}
           </label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-              $
-            </span>
+            {config.minPurchasePrefix !== undefined ? (
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                {config.minPurchasePrefix}
+              </span>
+            ) : (
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                $
+              </span>
+            )}
             <input
               type="number"
               value={customDeal.minPurchase}
               onChange={handleMinPurchaseChange}
-              className="w-full pl-7 pr-3 py-2 text-sm rounded-lg border border-gray-200 focus:border-[#000066] focus:ring-1 focus:ring-[#000066]"
-              placeholder="Min. purchase amount"
+              className={`w-full ${config.minPurchasePrefix !== undefined ? 'pl-3' : 'pl-7'} pr-3 py-2 text-sm rounded-lg border border-gray-200 focus:border-[#000066] focus:ring-1 focus:ring-[#000066]`}
+              placeholder={selectedDealType?.id === 'bogo' ? 'Enter get quantity' : 'Min. purchase amount'}
             />
           </div>
         </div>
-
-        {/* Short Description (now updates automatically) */}
-        {/* <div className="sm:col-span-2">
-          <label className="block text-xs font-medium text-gray-700 mb-1.5">
-            Short description <span className="text-red-500">*</span>
-          </label>
-          <textarea
-            value={customDeal.description}
-            readOnly
-            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 bg-gray-50 focus:border-[#000066] focus:ring-1 focus:ring-[#000066]"
-            rows={2}
-          />
-        </div> */}
       </>
     );
   };
 
   const renderPreviewCard = () => {
     const firstImage = customDeal.images[0];
+    
+    // Generate preview text based on deal type and values
+    const getPreviewText = () => {
+      if (!selectedDealType) return '';
+      
+      switch (selectedDealType.id) {
+        case 'percentage':
+          return `${customDeal.value || 0}% off${customDeal.minPurchase ? ` on $${customDeal.minPurchase} purchase` : ''}`;
+        case 'fixed_discount':
+          return `$${customDeal.value || 0} off${customDeal.minPurchase ? ` on $${customDeal.minPurchase} purchase` : ''}`;
+        case 'free_item':
+          return `Free item worth $${customDeal.value || 0}${customDeal.minPurchase ? ` on $${customDeal.minPurchase} purchase` : ''}`;
+        case 'bogo':
+          return `Buy ${customDeal.value || 1} Get ${customDeal.minPurchase || 1} Free`;
+        case 'item_discount':
+          return `$${customDeal.value || 0} off select items${customDeal.minPurchase ? ` on $${customDeal.minPurchase} purchase` : ''}`;
+        case 'custom':
+          return customDeal.value ? `$${customDeal.value} off${customDeal.minPurchase ? ` on $${customDeal.minPurchase} purchase` : ''}` : 'Custom deal';
+        default:
+          return '';
+      }
+    };
 
     return (
       <div className="flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-lg">
-        <div className={`w-16 h-16 ${firstImage?.isTemplate ? firstImage.bgColor || selectedDealType?.bgColor : 'bg-gray-50'} rounded-lg flex items-center justify-center overflow-hidden`}>
+        <div
+          className={`w-16 h-16 ${
+            firstImage?.isTemplate
+              ? firstImage.bgColor || selectedDealType?.bgColor
+              : "bg-gray-50"
+          } rounded-lg flex items-center justify-center overflow-hidden`}
+        >
           {firstImage ? (
             firstImage.isTemplate ? (
-              <img 
+              <img
                 src={firstImage.url}
                 alt="Deal"
                 className="w-14 h-14 object-contain"
               />
             ) : (
-              <img 
+              <img
                 src={firstImage.url}
                 alt="Deal"
                 className="w-full h-full object-cover"
@@ -542,13 +640,15 @@ const WelcomeDealModal = ({ isOpen, onClose, onSubmit }) => {
         </div>
         <div className="flex-1">
           <h3 className="text-[#000066] font-medium">
-            {selectedDealType?.label || 'Custom Deal'}
+            {/* {customDeal.dealName || selectedDealType?.label || "Custom Deal"} */}
+            {getPreviewText()}
           </h3>
           <p className="text-sm text-gray-500 mt-0.5">
+            {/* {getPreviewText()} */}
             {customDeal.fullDetails}
           </p>
         </div>
-        <button 
+        <button
           className="p-2 hover:bg-gray-100 rounded-full"
           onClick={() => setStep(1)}
         >
@@ -556,6 +656,14 @@ const WelcomeDealModal = ({ isOpen, onClose, onSubmit }) => {
         </button>
       </div>
     );
+  };
+
+  const handleDealNameChange = (e) => {
+    setCustomDeal(prev => ({
+      ...prev,
+      dealName: e.target.value
+    }));
+    if (touched.dealName) validateForm();
   };
 
   const renderStepContent = () => {
@@ -734,14 +842,8 @@ const WelcomeDealModal = ({ isOpen, onClose, onSubmit }) => {
                   </label>
                   <input
                     type="text"
-                    value={customDeal.dealName}
-                    onChange={(e) => {
-                      setCustomDeal((prev) => ({
-                        ...prev,
-                        dealName: e.target.value,
-                      }));
-                      if (touched.dealName) validateForm();
-                    }}
+                    // value={customDeal.dealName}
+                    onChange={handleDealNameChange}
                     onBlur={() => handleBlur("dealName")}
                     className={`w-full px-3 py-2 text-sm rounded-lg border ${
                       touched.dealName && errors.dealName
@@ -838,10 +940,44 @@ const WelcomeDealModal = ({ isOpen, onClose, onSubmit }) => {
                   <label className="block text-xs font-medium text-gray-700 mb-1.5">
                     Terms and conditions <span className="text-red-500">*</span>
                   </label>
+                  
+                  {/* Predefined Terms */}
+                  <div className="mb-3 space-y-2 border border-gray-200 rounded-lg p-3">
+                    {PREDEFINED_TERMS.map((term, index) => (
+                      <div key={index} className="flex items-start gap-2">
+                        <input
+                          type="checkbox"
+                          id={`term-${index}`}
+                          checked={customDeal.terms.includes(term)}
+                          onChange={(e) => {
+                            setCustomDeal(prev => {
+                              let terms = prev.terms.split('\n').filter(t => t.trim());
+                              if (e.target.checked) {
+                                terms.push(term);
+                              } else {
+                                terms = terms.filter(t => t !== term);
+                              }
+                              return {
+                                ...prev,
+                                terms: terms.join('\n')
+                              };
+                            });
+                            if (touched.terms) validateForm();
+                          }}
+                          className="mt-1 w-4 h-4 text-[#000066] border-gray-300 rounded focus:ring-[#000066]"
+                        />
+                        <label htmlFor={`term-${index}`} className="text-sm text-gray-600">
+                          {term}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Custom Terms Input */}
                   <textarea
                     value={customDeal.terms}
                     onChange={(e) => {
-                      setCustomDeal((prev) => ({
+                      setCustomDeal(prev => ({
                         ...prev,
                         terms: e.target.value,
                       }));
@@ -854,7 +990,7 @@ const WelcomeDealModal = ({ isOpen, onClose, onSubmit }) => {
                         : "border-gray-200 focus:border-[#000066] focus:ring-[#000066]"
                     } focus:ring-1`}
                     rows={3}
-                    placeholder="Enter terms and conditions"
+                    placeholder="Add additional terms and conditions (optional)"
                   />
                   {touched.terms && errors.terms && (
                     <p className="mt-1 text-xs text-red-500">{errors.terms}</p>

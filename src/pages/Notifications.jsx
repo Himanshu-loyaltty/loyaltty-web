@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Layout from '../components/Layout';
 import { BiCheck, BiX, BiDollar, BiTime } from 'react-icons/bi';
+import TopCommanHeader from '../components/TopCommanHeader';
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([
@@ -188,6 +189,7 @@ const Notifications = () => {
 
   return (
     <Layout>
+      {/* <TopCommanHeader /> */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">

@@ -1,31 +1,27 @@
-import { configureStore } from '@reduxjs/toolkit';
-import { setupListeners } from '@reduxjs/toolkit/query';
-import { persistStore, persistReducer } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
-import { apiSlice } from './api/apiSlice';
-import authReducer from './slices/authSlice';
-
+import { configureStore } from "@reduxjs/toolkit";
+import authReducer from "./orebiSlice";
+import {
+  persistStore,
+  persistReducer,
+} from "redux-persist";
+import storage from "redux-persist/lib/storage";
+import retailerService from "./services/retailerService";
 const persistConfig = {
-  key: 'root',
+  key: "root",
+  version: 1,
   storage,
-  whitelist: ['auth'] // Only auth will be persisted
 };
 
-const persistedAuthReducer = persistReducer(persistConfig, authReducer);
-
-export const store = configureStore({
+const persistedReducer = persistReducer(persistConfig, authReducer);
+const Store = configureStore({
   reducer: {
-    auth: persistedAuthReducer,
-    [apiSlice.reducerPath]: apiSlice.reducer,
+    [retailerService.reducerPath]: retailerService.reducer,
+    authReducer: persistedReducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: {
-        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
-      },
-    }).concat(apiSlice.middleware),
+    getDefaultMiddleware().concat([retailerService.middleware]),
 });
 
-setupListeners(store.dispatch);
+export default Store;
 
-export const persistor = persistStore(store); 
+export let persistor = persistStore(Store);

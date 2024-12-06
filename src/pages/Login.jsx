@@ -7,23 +7,7 @@ import { FcGoogle } from 'react-icons/fc';
 import { AiFillApple } from 'react-icons/ai';
 import logo from "../assets/loyaltty1024x1024.png";
 import BorderedBackButton from '../components/BorderedBackButton';
-
-// Fake user database
-const FAKE_USERS = [
-  {
-    emailPhone: 'user@example.com',
-    password: 'password123',
-    name: 'Test User'
-  },
-  {
-    emailPhone: '1234567890',
-    password: 'password123',
-    name: 'Phone User'
-  }
-];
-
-// Fake OTP verification
-const VALID_OTP = '1234';
+import { useLoginMutation } from '../store/services/retailerService';
 
 const Login = ({ 
   userType,
@@ -43,6 +27,7 @@ const Login = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const [login, { data, error: loginError }] = useLoginMutation();
 
   // Reset error when input changes
   useEffect(() => {
@@ -94,26 +79,6 @@ const Login = ({
     return true;
   };
 
-  // Validate credentials
-  const validateCredentials = (emailPhone, password) => {
-    const user = FAKE_USERS.find(user => user.emailPhone === emailPhone);
-    if (!user) {
-      setError('No account found with these credentials');
-      return false;
-    }
-    if (user.password !== password) {
-      setError('Invalid password');
-      return false;
-    }
-    return true;
-  };
-
-  // Validate OTP
-  const validateOTP = (otpArray) => {
-    const otpString = otpArray.join('');
-    return otpString === VALID_OTP;
-  };
-
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -123,26 +88,10 @@ const Login = ({
     setError('');
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      if (usePassword) {
-        if (validateCredentials(emailPhone, password)) {
-          navigate(userType === 'retailer' ? '/retailer/home' : '/customer/home');
-        }
-      } else if (otpMode) {
-        if (validateOTP(otp)) {
-          navigate(userType === 'retailer' ? '/retailer/home' : '/customer/home');
-        } else {
-          setError('Invalid OTP. Try 1234');
-        }
-      } else {
-        const user = FAKE_USERS.find(user => user.emailPhone === emailPhone);
-        if (!user) {
-          setError('No account found with this email/phone');
-          return;
-        }
-        setOtpMode(true);
-        console.log('OTP sent successfully (use 1234)');
+      const credentials = { emailPhone, password, otp };
+      const response = await login(credentials).unwrap();
+      if (response) {
+        navigate(userType === 'retailer' ? '/retailer/home' : '/customer/home');
       }
     } catch (err) {
       setError('An error occurred. Please try again.');

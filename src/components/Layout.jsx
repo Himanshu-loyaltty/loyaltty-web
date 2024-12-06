@@ -1,6 +1,6 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import Navbar from './Navbar';
+import TopCommanHeader from './TopCommanHeader';
 
 const Layout = ({ children }) => {
   return (
@@ -13,43 +13,18 @@ const Layout = ({ children }) => {
         <div className="absolute bottom-0 left-0 -z-10 h-[200px] w-[200px] sm:h-[310px] sm:w-[310px] rounded-full bg-[#000066] opacity-[0.15] blur-[80px] sm:blur-[100px]"></div>
       </div>
 
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute -top-4 -right-4 w-72 h-72 bg-[#000066]/10 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.2, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        <motion.div
-          className="absolute -bottom-4 -left-4 w-72 h-72 bg-[#000066]/10 rounded-full blur-3xl"
-          animate={{
-            scale: [1.2, 1, 1.2],
-            opacity: [0.2, 0.3, 0.2],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-      </div>
-
       {/* Content */}
       <div className="relative z-10">
         <Navbar />
         <div className="lg:pl-64">
-          {children}
+          <TopCommanHeader />
+          <main className="pt-4 sm:py-14">
+            {children}
+          </main>
         </div>
       </div>
     </div>
   );
 };
 
-export default Layout; 
+export default Layout;

@@ -1,90 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Layout from '../components/Layout';
-import { Line, Bar } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-} from 'chart.js';
-
-// Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-);
+import AnalyticsCards from '../components/AnalyticsCards';
+import TopCommanHeader from '../components/TopCommanHeader';
 
 const Analytics = () => {
   const [timeFilter, setTimeFilter] = useState('last 30 days');
 
-  // Quick Stats Data with updated colors
-  const quickStats = [
-    {
-      title: 'Orders',
-      value: '3',
-      subtitle: 'Number Of Confirmed Orders',
-      bgColor: 'bg-[#4A90E2]/10', // Light blue background
-      textColor: 'text-[#4A90E2]', // Blue text
-      icon: '🛍️'
-    },
-    {
-      title: 'Deals',
-      value: '15',
-      subtitle: 'Number Of Published Deals',
-      bgColor: 'bg-[#F5A623]/10', // Light orange background
-      textColor: 'text-[#F5A623]', // Orange text
-      icon: '🏷️'
-    },
-    {
-      title: 'Revenue',
-      value: '9',
-      subtitle: 'Number Of Earned Money',
-      bgColor: 'bg-[#9013FE]/10', // Light purple background
-      textColor: 'text-[#9013FE]', // Purple text
-      icon: '💰'
-    }
-  ];
-
-  const secondaryStats = [
-    {
-      title: 'Discount',
-      value: '5',
-      subtitle: 'Number Of Total Discounts',
-      bgColor: 'bg-[#E15B64]/10', // Light red background
-      textColor: 'text-[#E15B64]', // Red text
-      icon: '🎯'
-    },
-    {
-      title: 'ROI',
-      value: '5%',
-      subtitle: 'Percentage Of Earned Return',
-      bgColor: 'bg-[#2ECC71]/10', // Light green background
-      textColor: 'text-[#2ECC71]', // Green text
-      icon: '📈'
-    },
-    {
-      title: 'Customers',
-      value: '5',
-      subtitle: '2 New 3 Repeat',
-      bgColor: 'bg-[#00BCD4]/10', // Light cyan background
-      textColor: 'text-[#00BCD4]', // Cyan text
-      icon: '👥'
-    }
-  ];
 
   // Report Links
   const reportLinks = [
@@ -95,6 +17,7 @@ const Analytics = () => {
 
   return (
     <Layout>
+      <TopCommanHeader />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header with Time Filter */}
         <div className="flex justify-between items-center mb-8">
@@ -123,45 +46,7 @@ const Analytics = () => {
           </div>
         </div>
 
-        {/* Primary Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {quickStats.map((stat, index) => (
-            <motion.div
-              key={stat.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className={`${stat.bgColor} rounded-xl p-6 border border-gray-200/50`}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-2xl">{stat.icon}</span>
-                <span className={`text-4xl font-bold ${stat.textColor}`}>{stat.value}</span>
-              </div>
-              <h3 className={`text-lg font-semibold ${stat.textColor}`}>{stat.title}</h3>
-              <p className="text-sm text-gray-500">{stat.subtitle}</p>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Secondary Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {secondaryStats.map((stat, index) => (
-            <motion.div
-              key={stat.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + index * 0.1 }}
-              className={`${stat.bgColor} rounded-xl p-6 border border-gray-200/50`}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-2xl">{stat.icon}</span>
-                <span className={`text-4xl font-bold ${stat.textColor}`}>{stat.value}</span>
-              </div>
-              <h3 className={`text-lg font-semibold ${stat.textColor}`}>{stat.title}</h3>
-              <p className="text-sm text-gray-500">{stat.subtitle}</p>
-            </motion.div>
-          ))}
-        </div>
+        <AnalyticsCards />
 
         {/* Report Links */}
         <div className="space-y-4">

@@ -1,26 +1,89 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BiPlus, BiSearch } from 'react-icons/bi';
+import { BiEdit, BiTrash, BiPlus, BiX } from 'react-icons/bi';
 import Layout from '../components/Layout';
-import WelcomeDealModal from '../components/WelcomeDealModal';
 import AddDealModal from '../components/AddDealModal';
 import EditDealModal from '../components/EditDealModal';
+import { useNavigate } from 'react-router-dom';
+import { useDeals } from '../context/DealsContext';
+import DealStats from '../components/DealStats';
+
+const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, dealName }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
+        <div className="fixed inset-0 bg-black/30 transition-opacity" onClick={onClose} />
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6"
+        >
+          <div className="absolute right-0 top-0 pr-4 pt-4">
+            <button
+              onClick={onClose}
+              className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none"
+            >
+              <BiX className="h-6 w-6" />
+            </button>
+          </div>
+
+          <div className="sm:flex sm:items-start">
+            <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+              <BiTrash className="h-6 w-6 text-red-600" />
+            </div>
+            <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+              <h3 className="text-lg font-semibold leading-6 text-gray-900">
+                Delete Deal
+              </h3>
+              <div className="mt-2">
+                <p className="text-sm text-gray-500">
+                  Are you sure you want to delete "{dealName}"? This action cannot be undone.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse gap-3">
+            <button
+              onClick={onConfirm}
+              className="inline-flex w-full justify-center rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:w-auto"
+            >
+              Delete
+            </button>
+            <button
+              onClick={onClose}
+              className="mt-3 inline-flex w-full justify-center rounded-lg bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+            >
+              Cancel
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+};
 
 const Deals = () => {
-  const [activeTab, setActiveTab] = useState('Active');
+  const { deals, setDeals } = useDeals();
+  const [activeTab, setActiveTab] = useState('All Deal');
   const [showAddDeal, setShowAddDeal] = useState(false);
   const [showEditDeal, setShowEditDeal] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [deals, setDeals] = useState([]);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [dealToDelete, setDealToDelete] = useState(null);
+  const navigate = useNavigate();
 
-  const tabs = ['Active', 'Scheduled', 'Expired'];
+  const tabs = ['All Deal', 'Active Deal', 'Upcoming Deal', 'Past Deal'];
 
   const handleAddDeal = (dealData) => {
     setDeals(prevDeals => [...prevDeals, {
       id: Date.now(),
       ...dealData,
-      status: 'active'
+      status: 'Active Deal'
     }]);
     setShowAddDeal(false);
   };
@@ -35,138 +98,180 @@ const Deals = () => {
     setSelectedDeal(null);
   };
 
-  const filteredDeals = deals.filter(deal => {
-    const matchesSearch = deal.dealName?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTab = (
-      (activeTab === 'Active' && deal.status === 'active') ||
-      (activeTab === 'Scheduled' && new Date(deal.startDate) > new Date()) ||
-      (activeTab === 'Expired' && new Date(deal.endDate) < new Date())
-    );
-    return matchesSearch && matchesTab;
-  });
+  const getStatusClass = (status) => {
+    const statusClasses = {
+      'Active Deal': 'bg-green-100 text-green-800',
+      'Upcoming Deal': 'bg-blue-100 text-blue-800',
+      'Past Deal': 'bg-gray-100 text-gray-800'
+    };
+    return statusClasses[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  const filteredDeals = deals.filter(deal => 
+    activeTab === 'All Deal' || deal.status === activeTab
+  );
+
+  const handleDeleteDeal = (deal) => {
+    setDealToDelete(deal);
+    setShowDeleteConfirmation(true);
+  };
+
+  const confirmDelete = () => {
+    setDeals(prevDeals => prevDeals.filter(deal => deal.id !== dealToDelete.id));
+    setShowDeleteConfirmation(false);
+    setDealToDelete(null);
+  };
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+      <div className="p-6">
+        {/* Header with Tabs */}
+        <div className="bg-[#000066] text-white px-6 py-4 rounded-lg mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Deals</h1>
-            <p className="text-sm text-gray-500 mt-1">Manage your deals and offers</p>
+            <h1 className="text-2xl font-bold mb-1">Deals</h1>
           </div>
-          <button
-            onClick={() => setShowAddDeal(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-[#000066] hover:bg-[#000066]/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#000066]"
-          >
-            <BiPlus className="-ml-1 mr-2 h-5 w-5" />
-            Add New Deal
-          </button>
-        </div>
-
-        {/* Search and Filters */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* Search */}
-            <div className="relative flex-1">
-              <input
-                type="text"
-                placeholder="Search deals..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-[#000066] focus:border-[#000066]"
-              />
-              <BiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            </div>
-            
-            {/* Tabs */}
-            <div className="flex gap-2">
+          <div className="flex items-center gap-4">
+            <div className="flex gap-2 bg-white/10 p-1 rounded-lg">
               {tabs.map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                     activeTab === tab
-                      ? 'bg-[#000066] text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      ? 'bg-white text-[#000066]'
+                      : 'text-white/80 hover:bg-white/20'
                   }`}
                 >
                   {tab}
                 </button>
               ))}
             </div>
+            <button
+              onClick={() => setShowAddDeal(true)}
+              className="px-4 py-2 bg-white text-[#000066] rounded-lg hover:bg-white/90 transition-colors flex items-center gap-2 text-sm font-medium"
+            >
+              <BiPlus className="w-5 h-5" />
+              Add Deal
+            </button>
           </div>
         </div>
 
-        {/* Deals List */}
-        <div className="space-y-4">
+        {/* Stats Section */}
+        <DealStats deals={deals} />
+
+        {/* Deals Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredDeals.map((deal) => (
             <motion.div
               key={deal.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-xl border border-gray-200 p-4 hover:border-[#000066]/30 transition-colors"
+              className="bg-white rounded-xl p-4 flex gap-4 shadow-sm hover:shadow-md transition-shadow"
             >
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100">
-                  <img
-                    src={deal.dealPictures?.[0] || 'default-image-url'}
-                    alt={deal.dealName}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium text-gray-900">{deal.dealName}</h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {deal.shortDescription}
-                  </p>
-                  <div className="flex items-center gap-4 mt-2">
-                    <span className="text-sm font-medium text-[#000066]">
-                      ${deal.dealValue}
-                    </span>
-                    {deal.startDate && deal.endDate && (
-                      <span className="text-xs text-gray-500">
-                        {new Date(deal.startDate).toLocaleDateString()} - {new Date(deal.endDate).toLocaleDateString()}
+              <div className="w-32 h-32 rounded-lg overflow-hidden flex-shrink-0">
+                <img
+                  src={deal.image}
+                  alt={deal.dealName}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              
+              <div className="flex-1">
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">
+                      {deal.dealName}
+                      <span className={`ml-2 inline-block px-2 py-1 text-xs rounded-full ${getStatusClass(deal.status)}`}>
+                        {deal.status}
                       </span>
-                    )}
+                    </h3>
+                    <div className="text-xs text-gray-500">
+                      From: {deal.startDate} To: {deal.endDate}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setSelectedDeal(deal);
+                        setShowEditDeal(true);
+                      }}
+                      className="p-1.5 text-gray-400 hover:text-[#000066] rounded-lg hover:bg-gray-50"
+                    >
+                      <BiEdit className="w-5 h-5" />
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteDeal(deal)}
+                      className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-gray-50"
+                    >
+                      <BiTrash className="w-5 h-5" />
+                    </button>
                   </div>
                 </div>
-                <button
-                  onClick={() => {
-                    setSelectedDeal(deal);
-                    setShowEditDeal(true);
-                  }}
-                  className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
+                
+                <p className="text-sm text-gray-600 mb-3">
+                  {deal.description}
+                </p>
+                
+                <div className="text-lg font-semibold text-[#ff6b6b]">
+                  ${deal.dealValue} Off
+                </div>
+                
+                <button 
+                  onClick={() => navigate(`/deals/${deal.id}`)}
+                  className="mt-2 text-sm text-[#000066] font-medium hover:underline"
                 >
-                  Edit
+                  View Full Detail
                 </button>
               </div>
             </motion.div>
           ))}
-
-          {filteredDeals.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-gray-500">No deals found</p>
-            </div>
-          )}
         </div>
+
+        {filteredDeals.length === 0 && (
+          <div className="bg-white rounded-xl p-8 text-center">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No deals found</h3>
+            <p className="text-gray-500 mb-4">Get started by creating your first deal</p>
+            <button
+              onClick={() => setShowAddDeal(true)}
+              className="inline-flex items-center px-4 py-2 bg-[#000066] text-white rounded-lg hover:bg-[#000066]/90"
+            >
+              <BiPlus className="w-5 h-5 mr-2" />
+              Add New Deal
+            </button>
+          </div>
+        )}
+
+        {/* Modals */}
+        <AnimatePresence>
+          {showDeleteConfirmation && (
+            <DeleteConfirmationModal
+              isOpen={showDeleteConfirmation}
+              onClose={() => {
+                setShowDeleteConfirmation(false);
+                setDealToDelete(null);
+              }}
+              onConfirm={confirmDelete}
+              dealName={dealToDelete?.dealName}
+            />
+          )}
+        </AnimatePresence>
+
+        <AddDealModal
+          isOpen={showAddDeal}
+          onClose={() => setShowAddDeal(false)}
+          onSubmit={handleAddDeal}
+        />
+
+        <EditDealModal
+          isOpen={showEditDeal}
+          onClose={() => {
+            setShowEditDeal(false);
+            setSelectedDeal(null);
+          }}
+          onSubmit={handleEditDeal}
+          deal={selectedDeal}
+        />
       </div>
-
-      {/* Modals */}
-      <AddDealModal
-        isOpen={showAddDeal}
-        onClose={() => setShowAddDeal(false)}
-        onSubmit={handleAddDeal}
-      />
-
-      <EditDealModal
-        isOpen={showEditDeal}
-        onClose={() => {
-          setShowEditDeal(false);
-          setSelectedDeal(null);
-        }}
-        onSubmit={handleEditDeal}
-        deal={selectedDeal}
-      />
     </Layout>
   );
 };

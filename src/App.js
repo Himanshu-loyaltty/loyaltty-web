@@ -1,38 +1,32 @@
-import React, { Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Welcome from './pages/Welcome';
 import Onboarding from './pages/Onboarding';
-import RetailerLogin from './pages/retailer/RetailerLogin';
-import RetailerRegister from './pages/retailer/RetailerRegister';
-import CustomerLogin from './pages/customer/CustomerLogin';
-import CustomerRegister from './pages/customer/CustomerRegister';
-import ForgotPassword from './pages/ForgotPassword';
+import MerchantLogin from './pages/merchant/MerchantLogin';
+import MerchantRegister from './pages/merchant/MerchantRegister';
 import BusinessInfo from './pages/BusinessInfo';
+import ForgotPassword from './pages/ForgotPassword';
 import Home from './pages/Home';
-import QRMenu from './components/QRMenu';
-import ComingSoon from './pages/ComingSoon';
-import LoadingState from './components/LoadingState';
 import Settings from './pages/Settings';
 import Analytics from './pages/Analytics';
 import Notifications from './pages/Notifications';
-import ProtectedRoute from './components/ProtectedRoute';
-import { Provider } from 'react-redux';
-import { PersistGate } from 'redux-persist/integration/react';
-import { store, persistor } from './store/store';
 import Deals from './pages/Deals';
+import DealDetail from './pages/DealDetail';
+import { DealsProvider } from './context/DealsContext';
+import Store, { persistor } from "./store/store";
+import {Provider} from 'react-redux';
+import { PersistGate } from "redux-persist/integration/react";
 
 function App() {
   return (
-    <Provider store={store}>
-      <PersistGate loading={<LoadingState />} persistor={persistor}>
-        <Router>
-          <Suspense fallback={<LoadingState />}>
+    <Provider store={Store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <DealsProvider>
+          <Router>
             <Routes>
-              {/* Public Routes */}
               <Route path="/" element={<Welcome />} />
-              <Route path="/get-started" element={<Onboarding />} />
-              <Route path="/login" element={<RetailerLogin />} />
-              <Route path="/register" element={<RetailerRegister />} />
+              <Route path="/login" element={<MerchantLogin />} />
+              <Route path="/register" element={<MerchantRegister />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/business-info" element={<BusinessInfo />} />
               <Route path="/dashboard" element={<Home />} />
@@ -40,30 +34,10 @@ function App() {
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/settings" element={<Settings />} />
-
-              {/* Protected Dashboard Routes */}
-              {/* <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute allowedRoles={['retailer']}>
-                    <Home />
-                  </ProtectedRoute>
-                }
-              /> */}
-              {/* <Route
-                path="/notifications"
-                element={
-                  <ProtectedRoute>
-                    <Notifications />
-                  </ProtectedRoute>
-                }
-              /> */}
-              {/* ... other protected routes */}
-
-              {/* Rest of your routes */}
+              <Route path="/deals/:id" element={<DealDetail />} />
             </Routes>
-          </Suspense>
-        </Router>
+          </Router>
+        </DealsProvider>
       </PersistGate>
     </Provider>
   );

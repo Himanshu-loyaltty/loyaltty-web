@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
+import TopCommanHeader from '../components/TopCommanHeader';
 import { 
   BiUser, 
   BiLock, 
@@ -79,6 +80,7 @@ const Settings = () => {
 
   return (
     <Layout>
+      <TopCommanHeader />
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">

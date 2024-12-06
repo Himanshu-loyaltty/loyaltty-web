@@ -35,6 +35,9 @@ module.exports = {
       screens: {
         'xs': '480px',
       },
+      colors: {
+        navy: '#0A0F5C',
+      },
     },
   },
   plugins: [],

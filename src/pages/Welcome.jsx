@@ -89,9 +89,9 @@ const Welcome = () => {
                   whileHover={{ scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 400, damping: 10 }}
                 >
-                  <img 
-                    src={logo} 
-                    alt="Loyaltty" 
+                  <img
+                    src={logo}
+                    alt="Loyaltty"
                     className="w-28 xs:w-32 sm:w-36"
                     loading="eager"
                   />
@@ -238,14 +238,15 @@ const Welcome = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
               <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8">
                 <div className="col-span-2 xs:col-span-2 sm:col-span-1 space-y-4">
-                  <img 
-                    src={logo} 
-                    alt="Loyaltty" 
+                  <img
+                    src={logo}
+                    alt="Loyaltty"
                     className="w-28 xs:w-32"
                     loading="lazy"
                   />
                   <p className="text-sm text-gray-600">
-                    Empowering businesses with smart digital solutions since 2024.
+                    Empowering businesses with smart digital solutions since
+                    2024.
                   </p>
                   <div className="flex space-x-4">
                     {["twitter", "facebook", "linkedin", "instagram"].map(
@@ -266,16 +267,16 @@ const Welcome = () => {
                 {[
                   {
                     title: "Product",
-                    items: ["Features", "Pricing", "Demo", "API"]
+                    items: ["Features", "Pricing", "Demo", "API"],
                   },
                   {
                     title: "Company",
-                    items: ["About", "Blog", "Careers", "Contact"]
+                    items: ["About", "Blog", "Careers", "Contact"],
                   },
                   {
                     title: "Legal",
-                    items: ["Privacy", "Terms", "Security", "Cookies"]
-                  }
+                    items: ["Privacy", "Terms", "Security", "Cookies"],
+                  },
                 ].map((section) => (
                   <div key={section.title} className="col-span-1">
                     <h3 className="font-semibold text-gray-900 mb-4">
